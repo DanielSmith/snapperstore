@@ -48,7 +48,7 @@ space for day list...
 
         // put this in some global config
         SERVER_HOST: 'localhost',
-        SERVER_PORT: '3100',
+        SERVER_PORT: '8081',
 
         title: 'SnapperStore',
 
@@ -119,8 +119,6 @@ space for day list...
       createImage: function(source) {
         let pastedImage = new Image();
         pastedImage.onload = function() {
-
-          console.dir(pastedImage);
           let height = pastedImage.height;
           let width = pastedImage.width;
           let length = pastedImage.length;
@@ -128,39 +126,12 @@ space for day list...
         pastedImage.src = source;
         this.imageList.unshift(pastedImage.src);
       },
-
-      
-
+    
       doDrop: function(event) {
         event.preventDefault();
         this.doDroppedFiles(event);
-
-        let link = event.dataTransfer.getData('Text');
-
-        if (event.dataTransfer.types) {
-          // do a map in here...
-        }
-
-        let curImage = new Image();
-        let canvas = document.createElement('canvas');
-        let ctx = canvas.getContext('2d');
-
-        curImage.onload = () => {
-          canvas.width = curImage.width;
-          canvas.height = curImage.height;
-          ctx.drawImage(curImage, 0, 0);
-          let image = document.createElement('img');
-          image.src = canvas.toDataURL('image/png');
-
-          // this.doUpload(image);
-        }
-
-        curImage.setAttribute('crossOrigin', 'anonymous');
-        curImage.src = link;
       },
-
       
-
       doUpload(imageFile) {
         const uploadData = new FormData();
         uploadData.append('thefile', imageFile);
