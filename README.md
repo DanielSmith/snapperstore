@@ -31,6 +31,7 @@ snapperstore
 │   └── src
 └── snapstore-server
 ```
+You may want to open up two shells - one for server, one for client.
 
 ### Server Side
 ``` bash
@@ -43,15 +44,25 @@ npm install
 npm run server
 ```
 
+### Client Side
+
 ``` bash
+cd snapstore-client
+
 # install dependencies
 npm install
 
 # serve with hot reload at localhost:8080
 npm run dev
-
-# build for production with minification
-npm run build
 ```
 
-For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
+### Getting Started
+
+Once the client and server sides are running, you will see a mostly empty page at http://localhost:8080/
+
+Drag an image from your filesytem on to the page.  You should see an image preview of the file.  It should also automatically upload the file to the server side.
+
+If you refresh the browser, you will notice that there is now a button with today's date.  Snapperstore creates a new server side directory for each day (to avoid having to sift through more than a days worth of images at once)
+
+Try a screen region capture, followed by a paste
+
