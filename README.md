@@ -1,6 +1,7 @@
-# Snapstore
+# Snapperstore
 
-<p align="center">Sample image upload client &amp; server</p>
+## Sample image upload client &amp; server
+
 
 ## Overview
 
@@ -23,7 +24,6 @@ It is not intended to be a production level example of validation, error handlin
 ## Build Setup
 
 After cloning the repository, you will see this directory structure:
-
 ```
 snapperstore
 ├── snapstore-client
@@ -32,6 +32,16 @@ snapperstore
 └── snapstore-server
 ```
 
+### Server Side
+``` bash
+cd snapstore-server
+
+# install dependencies
+npm install
+
+# Node process will run at port 8081
+npm run server
+```
 
 ``` bash
 # install dependencies
