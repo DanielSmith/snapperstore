@@ -6,7 +6,7 @@ const uuid = require("node-uuid");
 const datefns = require('date-fns');
 const fs = require('fs');
 const { join } = require('path')
-const ROOT_UPLOAD_DIR = './uploads';
+const ROOT_UPLOAD_DIR = './public/uploads';
 
 function checkDir(whichDir = '') {  
 

@@ -13,7 +13,7 @@ let storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const checkTodayDir = utils.todayDir();
     utils.checkDir(checkTodayDir);
-    cb(null, `uploads/${checkTodayDir}`)
+    cb(null, `public/uploads/${checkTodayDir}`)
   },
   filename: function (req, file, cb) {
     cb(null, utils.createUploadFilename('.png'));
@@ -40,5 +40,5 @@ router.post('/fileupload', uploadFile, function(req, res, next) {
   });
 })
 
-
+router.get('/')
 

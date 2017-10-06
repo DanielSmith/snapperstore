@@ -24,17 +24,22 @@
                     </span>
                 </v-flex>
 
-              <v-layout row v-for="curImage in this.imageList" key="curKey++">
+              <v-layout row v-for="newImage in this.addedList" key="curKey++">
                 <v-flex xs12>
                   <v-card flat pb-5
-                        <img :src="getImagePath(curImage)">
+                      <img :src="newImage">
                   </v-card>
-
                 </v-flex>
               </v-layout>
 
+              <v-layout row v-for="curImage in this.imageList" key="curKey++">
+                <v-flex xs12>
+                  <v-card flat pb-5
+                      <img :src= "getImagePath(curImage)">
+                  </v-card>
+                </v-flex>
+              </v-layout>
             </v-layout>
-
         </v-container>
       </v-content>
     </main>
@@ -59,6 +64,7 @@
         curImageDir: '',
 
         imageList: [],
+        addedList: [],
         dayList: []
       }
     },
@@ -109,8 +115,9 @@
           let reader = new FileReader();
           reader.onload = (inner) => {
             let droppedImage = new Image();
-            droppedImage.onload = function() {
-              myImageList.unshift(droppedImage.src);
+            droppedImage.onload = () => {
+              this.addedList.unshift(droppedImage.src);
+              console.dir(this.addedList);
             }
             droppedImage.src = reader.result;
           }
@@ -136,7 +143,7 @@
           let length = pastedImage.length;
         }
         pastedImage.src = source;
-        this.imageList.unshift(pastedImage.src);
+        this.addedList.unshift(pastedImage.src);
       },
     
       doDrop: function(event) {
@@ -151,7 +158,11 @@
           .then(response => response.json())
           .then(response => {
             this.dayList = response;
-            console.dir(response);
+
+            // if we have something, let's show the first day we know about
+            if (this.dayList.length > 0) {
+              this.getDay(this.dayList[0]);
+            }
           })
           .catch(err => {
             console.log(err);
@@ -159,14 +170,15 @@
       },
 
       getDay(theDay) {
-
         this.curImageDir = theDay;
+
+        this.imageList = [];
+        this.addedList = [];
 
         fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/${theDay}`)
           .then(response => response.json())
           .then(response => {
             this.imageList = response;
-            console.dir(response);
           })
           .catch(err => {
             console.log(err);
@@ -181,9 +193,6 @@
       doUpload(imageFile) {
         const uploadData = new FormData();
         uploadData.append('thefile', imageFile);
-        // uploadData.append('title', 'image upload');
-        // uploadData.append('description', 'image description');
-        // uploadData.append('container', this.curCollectionList._id);
 
         const config = {
           headers: { 'content-type': 'multipart/form-data' }
