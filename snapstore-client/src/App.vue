@@ -5,33 +5,38 @@
     @dragstart.native="dragOver"
     @dragend.native="dragEnd"
     @paste.native="onPaste($event)">
-  >     
-    <v-toolbar fixed>
+
+
+    <v-toolbar>
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
     <main>
-      <v-container fluid>
-        <v-slide-y-transition mode="out-in">
-          <v-layout column align-center>
-            <blockquote>
+      <v-content>
+        <v-container fluid>
+            <v-layout row wrap>
+                <v-flex xs12>
+                    <span v-for="curDay in this.dayList" :key="curDay">
+                      <v-btn round color="primary"
+                        @click="getDay(curDay)">
+                        {{ curDay }}
+                      </v-btn>
+                    </span>
+                </v-flex>
 
-space for day list...
+              <v-layout row v-for="curImage in this.imageList" key="curKey++">
+                <v-flex xs12>
+                  <v-card flat pb-5
+                        <img :src="getImagePath(curImage)">
+                  </v-card>
 
-            </blockquote>
+                </v-flex>
+              </v-layout>
 
-            <v-layout row v-for="curImage in this.imageList" key="curKey++">
-              <v-flex xs12>
-
-                <v-card flat pb-5
-                      <img :src="curImage">
-                </v-card>
-
-              </v-flex>
             </v-layout>
-          </v-layout>
-        </v-slide-y-transition>
-      </v-container>
+
+        </v-container>
+      </v-content>
     </main>
   </v-app>
 </template>
@@ -51,9 +56,16 @@ space for day list...
         SERVER_PORT: '8081',
 
         title: 'SnapperStore',
+        curImageDir: '',
 
-        imageList: []
+        imageList: [],
+        dayList: []
       }
+    },
+
+
+    mounted: function() {
+      this.getCollections();
     },
 
     methods: {
@@ -132,6 +144,40 @@ space for day list...
         this.doDroppedFiles(event);
       },
       
+
+      getCollections() {
+        // call server for JSON data
+        fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}`)
+          .then(response => response.json())
+          .then(response => {
+            this.dayList = response;
+            console.dir(response);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      },
+
+      getDay(theDay) {
+
+        this.curImageDir = theDay;
+
+        fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/${theDay}`)
+          .then(response => response.json())
+          .then(response => {
+            this.imageList = response;
+            console.dir(response);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      },
+
+      getImagePath(curImage) {
+        let imagePath =  `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${this.curImageDir}/${curImage}`;
+        return imagePath;
+      },
+ 
       doUpload(imageFile) {
         const uploadData = new FormData();
         uploadData.append('thefile', imageFile);
@@ -154,3 +200,7 @@ space for day list...
     }
   }
 </script>
+
+<style lang="stylus">
+@import './stylus/main'
+</style>

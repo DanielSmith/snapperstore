@@ -5,6 +5,7 @@
 const uuid = require("node-uuid");
 const datefns = require('date-fns');
 const fs = require('fs');
+const { join } = require('path')
 const ROOT_UPLOAD_DIR = './uploads';
 
 function checkDir(whichDir = '') {  
@@ -26,6 +27,41 @@ function todayDir() {
 }
 
 
+function getDirs() {  
+
+  // a little long winded, just for clarity
+  const entries = fs.readdirSync(ROOT_UPLOAD_DIR)
+  let dirEntries = [];
+
+  entries.map(file => {
+    if (fs.lstatSync(`${ROOT_UPLOAD_DIR}/${file}`).isDirectory() && file[0] !== '.') {
+      dirEntries.push(file);
+    }
+  });
+
+  return dirEntries;
+}
+
+function getImages(dir = '') {
+  let imageDir;
+  let entries = [];
+
+  // if we dont have a directory specified, try today... 
+  if (dir === '') {
+    dir = todayDir();
+  }
+
+  // sanitize path .. seriously..
+  // who knows what they they sent over? ;)
+  dir = dir.replace(/[^a-zA-Z0-9-]/g, '');
+  imageDir = `${ROOT_UPLOAD_DIR}/${dir}`;
+ 
+  if (fs.existsSync(imageDir)) {
+    entries = fs.readdirSync(imageDir);
+  }
+  return entries;
+}
+
 function createUploadFilename(ext = '') {
   const ts = datefns.getTime(new Date());
   const unique = uuid.v4();
@@ -37,5 +73,7 @@ function createUploadFilename(ext = '') {
 module.exports = {
   todayDir,
   checkDir,
+  getDirs,
+  getImages,
   createUploadFilename
 };
