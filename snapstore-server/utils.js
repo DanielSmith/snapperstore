@@ -6,6 +6,7 @@ const uuid = require("node-uuid");
 const datefns = require('date-fns');
 const fs = require('fs');
 const { join } = require('path')
+const ROOT_PUBLIC_DIR = './public';
 const ROOT_UPLOAD_DIR = './public/uploads';
 
 function checkDir(whichDir = '') {  
@@ -13,6 +14,9 @@ function checkDir(whichDir = '') {
   const dir = `${ROOT_UPLOAD_DIR}/${whichDir}`;
 
   // in case we need the top level...
+  if (!fs.existsSync(ROOT_PUBLIC_DIR)) {
+      fs.mkdirSync(ROOT_PUBLIC_DIR);
+  }
   if (!fs.existsSync(ROOT_UPLOAD_DIR)) {
       fs.mkdirSync(ROOT_UPLOAD_DIR);
   }
