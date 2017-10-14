@@ -15,8 +15,9 @@ let storage = multer.diskStorage({
     utils.checkDir(checkTodayDir);
     cb(null, `public/uploads/${checkTodayDir}`)
   },
-  filename: function (req, file, cb) {
-    cb(null, utils.createUploadFilename('.png'));
+  filename: function (req, file, cb) {        
+    let ext = utils.getExt(file);
+    cb(null, utils.createUploadFilename(`.${ext}`));
   }
 })
 
@@ -34,7 +35,6 @@ module.exports = router;
 
 // this and addlink share the DB save code.. should refactor
 router.post('/fileupload', uploadFile, function(req, res, next) {
-
   res.json({
     status: "ok"
   });

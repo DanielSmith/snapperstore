@@ -6,7 +6,6 @@
     @dragend.native="dragEnd"
     @paste.native="onPaste($event)">
 
-
     <v-toolbar>
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
@@ -24,20 +23,29 @@
                 </v-flex>
               </v-layout>
               <v-flex xs12>
-            <span v-for="curDay in this.dayList" :key="curDay">
-                    <v-btn round color="primary"
-                      @click="getDay(curDay)">
-                      {{ curDay }}
-                    </v-btn>
-                  </span>
+                <span v-for="curDay in this.dayList" :key="curDay">
+                  <v-btn round color="primary"
+                    @click="getDay(curDay)">
+                    {{ curDay }}
+                  </v-btn>
+                </span>
               </v-flex>
 
-              <v-layout row v-for="newImage in this.addedList" key="curKey++">
+              <v-layout row v-for="curItem in this.pastedList" key="curKey++">
                 <v-flex xs12>
                   <v-card flat pb-5>
-      hello!
-                      <audio :src="newImage" controls></audio>
-                      <video :src="newImage" controls></video>
+                    <img :src="curItem"> 
+                  </v-card>
+                </v-flex>
+              </v-layout>
+
+              <v-layout row v-for="curItem in this.addedList" key="curKey++">
+                <v-flex xs12>
+                  <v-card flat pb-5>
+
+                    <component :itemPath="curItem.data.src" key="curKey++" v-bind:is="curItem.componentType">
+                    </component>
+
                   </v-card>
                 </v-flex>
               </v-layout>
@@ -45,18 +53,12 @@
 
               <v-layout row v-for="curItem in this.itemList" key="curKey++">
                 <v-flex xs12>
-
-
-
                   <v-card flat pb-5>
-                      <!-- <img :src= "getImagePath(curItem.data)"> -->
-                <component :itemPath="getItemPath(curItem.data)" key="curKey++" v-bind:is="curItem.mimeType">
-                </component>
-                  </v-card>
 
-                  <!-- <v-card flat pb-5>
-                      <video controls :src= "getItemPath(curItem.data)"></video>
-                  </v-card> -->
+                    <component :itemPath="getItemPath(curItem.data)" key="curKey++" v-bind:is="curItem.componentType">
+                    </component>
+
+                  </v-card>
                 </v-flex>
               </v-layout>
             </v-layout>
@@ -71,7 +73,7 @@ import axios from 'axios';
 import audioComponent from './Audio';
 import videoComponent from './Video';
 import imageComponent from './Image';
-import mimeUtils from './mimeUtils';
+import mimeUtils from '../../common//mimeUtils';
 
 
 export default {
@@ -95,6 +97,7 @@ export default {
       curItemDir: '',
 
       itemList: [],
+      pastedList: [],
       addedList: [],
       dayList: []
     }
@@ -111,22 +114,17 @@ export default {
     onPaste(event) {
       let index = 0;
       let items = (event.clipboardData || event.originalEvent.clipboardData).items;
-
       // TODO:  do a check here to see if it is an image...
       let imageItem = items[0];
       let imageFile = imageItem.getAsFile();
-
       if (imageItem.kind === 'file') {
         let reader = new FileReader();
-
         let URLObj = window.URL || window.webkitURL;
         let source = URLObj.createObjectURL(imageFile);
         this.createImage(source);
-
         reader.onload = (event) => {
           let myImage = new Image();
           myImage.src = event.target.result;
-
           myImage.onload = () => {
             // this.doUpload(myImage);
           }
@@ -141,27 +139,27 @@ export default {
       let that = this;
 
       theFiles.map(curFile => {
-        console.dir(curFile);
         // get file type
         let curFileData = mimeUtils.getData(curFile);
-        console.log(curFileData);
 
-
-
+        // am sure this should be reworked.. hacked it from being
+        // image-only to image, audio, or video
         let reader = new FileReader();
         reader.onload = (inner) => {
           let droppedItem = this.getNewElementForType(curFileData.type);
+          let newObj = {};
+          newObj.componentType = mimeUtils.getItemType(curFileData.ext);
+          newObj.data = droppedItem;
+
           droppedItem.onload = () => {
-            // this.addedList.unshift(droppedItem.src);
-            console.log(this.addedList);
             this.showDropHelp = 0;
           }
           droppedItem.src = reader.result;
-          this.addedList.unshift(droppedItem.src);
+          this.addedList.push(newObj);
         }
 
         reader.readAsDataURL(curFile);
-        this.doUpload(curFile);
+        this.doUpload(curFile, curFileData.ext);
       })
     },
 
@@ -196,13 +194,12 @@ export default {
 
     createImage: function(source) {
       let pastedImage = new Image();
+
       pastedImage.onload = function() {
-        let height = pastedImage.height;
-        let width = pastedImage.width;
-        let length = pastedImage.length;
+        // if we want to do anything special here..
       }
       pastedImage.src = source;
-      this.addedList.unshift(pastedImage.src);
+      this.pastedList.unshift(pastedImage.src);
       this.showDropHelp = 0;
     },
   
@@ -234,6 +231,7 @@ export default {
 
       this.itemList = [];
       this.addedList = [];      
+      this.pastedList = [];      
 
       fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/${theDay}`)
         .then(response => response.json())
@@ -241,7 +239,8 @@ export default {
           response.map(cur => {
             let newObj = {};
             newObj.data = cur;
-            newObj.mimeType = "imageComponent";
+            newObj.componentType = mimeUtils.getItemType(cur);
+
             this.itemList.push(newObj);
           })
         })
@@ -255,9 +254,10 @@ export default {
       return itemPath;
     },
 
-    doUpload(imageFile) {
+    doUpload(uploadFile, extension = "png") {
       const uploadData = new FormData();
-      uploadData.append('thefile', imageFile);
+      uploadData.append('thefile', uploadFile);
+      uploadData.append('extension', extension);
 
       const config = {
         headers: { 'content-type': 'multipart/form-data' }
@@ -265,7 +265,7 @@ export default {
 
       axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/fileupload`, uploadData, config)
         .then(function (response) {
-          console.log(response);
+          // console.log(response);
         })
         .catch(function (error) {
           console.log(error);
@@ -277,4 +277,7 @@ export default {
 
 <style lang="stylus">
 @import './stylus/main'
+img {
+  max-width: 400px;
+}
 </style>

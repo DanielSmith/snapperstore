@@ -1,18 +1,14 @@
 <template>
   <div>
-
-
-I am audio!  {{this.foo}}
-
+    <audio controls :src="itemPath"></audio>
   </div>
 </template>
 
 <script>
   export default {
-   props: ['foo'] 
+   props: ['itemPath'] 
   }
 </script>
 
 <style scoped>
-
 </style>

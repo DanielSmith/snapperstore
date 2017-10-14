@@ -9,7 +9,3 @@
    props: ['itemPath'] 
   }
 </script>
-
-<style scoped>
-
-</style>

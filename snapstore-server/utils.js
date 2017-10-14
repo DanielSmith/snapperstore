@@ -9,6 +9,7 @@ const { join } = require('path')
 const ROOT_PUBLIC_DIR = './public';
 const ROOT_UPLOAD_DIR = './public/uploads';
 
+
 function checkDir(whichDir = '') {  
 
   const dir = `${ROOT_UPLOAD_DIR}/${whichDir}`;
@@ -66,11 +67,80 @@ function getImages(dir = '') {
   return entries;
 }
 
-function createUploadFilename(ext = '') {
+function createUploadFilename(ext) {
   const ts = datefns.getTime(new Date());
   const unique = uuid.v4();
 
   return `${ts}-${unique}${ext}`;  
+}
+
+
+// these belong in the commmon/mimeUtils.js module...
+// need to resolve importing from vue and node sides...
+
+let mimeUtils = {
+  
+  // since there is no server side DB,
+  // we use the filename extension to map
+  // to a type (image, audio, or video),
+  // so that we know how to render
+  mimeTable: {
+
+    // images
+    "image/jpeg": {
+      type: "image",
+      ext: "jpg"
+    },
+
+    "image/png": {
+      type: "image",
+      ext: "png"
+    },
+
+    "image/bmp": {
+      type: "image",
+      ext: "bmp"
+    },
+
+    "image/gif": {
+      type: "image",
+      ext: "gif"
+    },
+    
+    // audio
+    "audio/x-wav": {
+      type: "audio",
+      ext: "wav"
+    },
+    
+    "audio/mpeg": {
+      type: "audio",
+      ext: "mp3"
+    },
+    
+    // video
+    "video/mp4": {
+      type: "video",
+      ext: "mp4"
+    },
+
+    "video/x-m4v": {
+      type: "video",
+      ext: "m4v"
+    },
+
+    "video/ogg": {
+      type: "video",
+      ext: "ogv"
+    },
+  }    
+}
+
+
+function getExt(theFile) {
+  if (mimeUtils.mimeTable[theFile.mimetype]) {
+    return mimeUtils.mimeTable[theFile.mimetype].ext;
+  }
 }
 
 
@@ -79,5 +149,6 @@ module.exports = {
   checkDir,
   getDirs,
   getImages,
-  createUploadFilename
+  createUploadFilename,
+  getExt
 };
