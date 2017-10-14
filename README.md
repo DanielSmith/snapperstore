@@ -12,6 +12,8 @@ This is an end-to-end example of how to upload images via paste or file drag/dro
 
 It is not intended to be a production level example of validation, error handling, etc.  This is simply a quick example that I did for a friend.  It is mostly extracted from my <a href="https://github.com/DanielSmith/ThereThenThat-Server">ThereThenThat project</a>.
 
+This uses Vue.js Dynamic Components.  This is a good alternative to having a lot of v-if/else within a template.
+
 ## Features
 
 * display groups of images, audio(mp3), and video(mp4) by day uploaded
