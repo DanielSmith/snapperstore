@@ -1,6 +1,6 @@
 # Snapperstore
 
-## Sample image upload client &amp; server
+## Sample image, audio, and video upload client &amp; server
 
 
 ## Overview
