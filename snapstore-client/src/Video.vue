@@ -1,6 +1,5 @@
 <template>
   <div>
-  video!
     <video controls :src="itemPath"></video>
   </div>
 </template>

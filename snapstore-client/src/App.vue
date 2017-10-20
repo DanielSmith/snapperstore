@@ -13,7 +13,6 @@
     <main>
       <v-content>
         <v-container fluid>
-            <v-layout row wrap>
 
               <v-layout row v-if="this.showDropHelp">
                 <v-flex xs12>
@@ -36,6 +35,8 @@
                   <v-card flat pb-5>
                     <img :src="curItem"> 
                   </v-card>
+                  <v-spacer></v-spacer>
+
                 </v-flex>
               </v-layout>
 
@@ -45,6 +46,7 @@
 
                     <component :itemPath="curItem.data.src" key="curKey++" v-bind:is="curItem.componentType">
                     </component>
+                  <v-spacer></v-spacer>
 
                   </v-card>
                 </v-flex>
@@ -53,7 +55,7 @@
 
               <v-layout row v-for="curItem in this.itemList" key="curKey++">
                 <v-flex xs12>
-                  <v-card flat pb-5>
+                  <v-card class="text-xs-left" flat pb-5>
 
                     <component :itemPath="getItemPath(curItem.data)" key="curKey++" v-bind:is="curItem.componentType">
                     </component>
@@ -61,7 +63,6 @@
                   </v-card>
                 </v-flex>
               </v-layout>
-            </v-layout>
         </v-container>
       </v-content>
     </main>
@@ -73,7 +74,7 @@ import axios from 'axios';
 import audioComponent from './Audio';
 import videoComponent from './Video';
 import imageComponent from './Image';
-import mimeUtils from '../../common//mimeUtils';
+import mimeUtils from '../../common/mimeUtils';
 
 
 export default {
