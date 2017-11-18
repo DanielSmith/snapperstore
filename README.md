@@ -9,6 +9,8 @@ This is an end-to-end example of how to upload images via paste or file drag/dro
 
 * Vue.js, Vuetify
 * Node.js, Express, Multer
+* (optional) MongoDB support via mLab for simple search 
+* (optional) email support via SendGrid
 
 It is not intended to be a production level example of validation, error handling, etc.  This is simply a quick example that I did for a friend.  It is mostly extracted from my <a href="https://github.com/DanielSmith/ThereThenThat-Server">ThereThenThat project</a>.
 

@@ -2,10 +2,13 @@
 **  api.js
 */
 
-const path = require('path')
 const express = require('express');
-const router = express.Router();
+const ssconfig = require("./config.json");
 const utils = require("./utils.js");
+
+const { MediaProject } = require('./models/ssmodels');
+var router = express.Router();
+module.exports = router;
 
 
 const multer  = require('multer');
@@ -24,21 +27,31 @@ let storage = multer.diskStorage({
 let multerUpload = multer({ storage: storage })
 let uploadFile = multerUpload.single('thefile');
 
-const api = express();
-const bodyParser = require("body-parser");
-
-api.use(bodyParser.urlencoded({extended: false}));
-api.use(bodyParser.json());
-
-module.exports = router;
-
-
-// this and addlink share the DB save code.. should refactor
-router.post('/fileupload', uploadFile, function(req, res, next) {
+router.post('/gettags', function(req, res) {
+  
+  // const tq = req.body.tagquery;
+  
+  console.log(' in gett');
+  console.log(req.body.tagquery);
   res.json({
     status: "ok"
   });
 })
+
+// this and addlink share the DB save code.. should refactor
+router.post('/fileupload', uploadFile, function(req, res, next) {
+  
+  // are we using a database too?
+  const theTags = JSON.parse(req.body.tags);
+  
+  
+  console.log(theTags);
+  console.log(theTags[1]);
+  res.json({
+    status: "ok"
+  });
+})
+
 
 router.get('/')
 

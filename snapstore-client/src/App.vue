@@ -6,14 +6,32 @@
     @dragend.native="dragEnd"
     @paste.native="onPaste($event)">
 
-    <v-toolbar>
-      <v-toolbar-title v-text="title"></v-toolbar-title>
+    <v-toolbar >
+      <v-toolbar-title v-text="titleStr"></v-toolbar-title>
+      <v-toolbar-title v-text="addedItemStr"></v-toolbar-title>
       <v-spacer></v-spacer>
+
     </v-toolbar>
     <main>
-      <v-content>
+      <v-content class="blue-grey lighten-2">
         <v-container fluid>
+          <v-layout row wrap>
+              <v-flex xs4  v-if="this.$config.USE_DB">
+                <v-text-field large
+                  label="Search Tag"
+                  v-model="name"
+                ></v-text-field>
 
+              </v-flex>
+              <v-flex xs2 v-if="this.$config.USE_DB">
+                <v-btn large
+                  primary
+                  @click="submit"
+                >
+                Submit
+                </v-btn>
+              </v-flex>
+          </v-layout>
               <v-layout row v-if="this.showDropHelp">
                 <v-flex xs12>
                   <v-card flat pb-5>
@@ -32,7 +50,7 @@
 
               <v-layout row v-for="curItem in this.pastedList" key="curKey++">
                 <v-flex xs12>
-                  <v-card flat pb-5>
+                  <v-card flat pb-5 class="newItemBorder">
                     <img :src="curItem"> 
                   </v-card>
                   <v-spacer></v-spacer>
@@ -42,7 +60,7 @@
 
               <v-layout row v-for="curItem in this.addedList" key="curKey++">
                 <v-flex xs12>
-                  <v-card flat pb-5>
+                  <v-card flat pb-5 class="newItemBorder">
 
                     <component :itemPath="curItem.data.src" key="curKey++" v-bind:is="curItem.componentType">
                     </component>
@@ -94,8 +112,10 @@ export default {
       SERVER_HOST: 'localhost',
       SERVER_PORT: '8081',
 
-      title: 'SnapperStore',
+      titleStr: 'SnapperStore',
       curItemDir: '',
+      addedItemStr: '',
+      name: '',
 
       itemList: [],
       pastedList: [],
@@ -110,6 +130,10 @@ export default {
   },
 
   methods: {
+    submit() {
+      // go query for the tag(s)
+      this.getTags(this.name);
+    },
 
     // pasted from screen / region capture
     onPaste(event) {
@@ -227,12 +251,39 @@ export default {
         });
     },
 
+    getTags(theQueryStr = "") {
+      const trimmedQueryStr = theQueryStr.trim();
+      // let tagForm = new FormData();
+      // tagForm.append('tagquery', trimmedQueryStr);
+
+
+      // const config = {
+      //   headers: { 'content-type': 'application/x-www-form-urlencoded' }
+      // }
+
+      const config = { headers: { 'Content-Type': 'application/json' } };
+
+      axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/gettags`,
+        { tagquery: trimmedQueryStr },config)     
+        .then(function (response) {
+          // console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+
+    },
+
     getDay(theDay) {
       this.curItemDir = theDay;
+      this.addedItemStr = '';
+
 
       this.itemList = [];
       this.addedList = [];      
-      this.pastedList = [];      
+      this.pastedList = [];
+      this.titleStr = `SnapperStore - for day: ${theDay}`;      
 
       fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/${theDay}`)
         .then(response => response.json())
@@ -252,18 +303,23 @@ export default {
 
     getItemPath(curItem) {
       let itemPath =  `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${this.curItemDir}/${curItem}`;
-      return itemPath;
+      return itemPath; 
     },
 
     doUpload(uploadFile, extension = "png") {
+      const testTags = ['here', 'bridge', 'car'];
+      const tagData = JSON.stringify(testTags);
+
       const uploadData = new FormData();
       uploadData.append('thefile', uploadFile);
       uploadData.append('extension', extension);
+      uploadData.append('tags', tagData);
 
       const config = {
         headers: { 'content-type': 'multipart/form-data' }
       }
 
+      this.addedItemStr = `adding items for today...`;
       axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/fileupload`, uploadData, config)
         .then(function (response) {
           // console.log(response);
@@ -280,5 +336,11 @@ export default {
 @import './stylus/main'
 img {
   max-width: 400px;
+}
+
+.newItemBorder img,
+.newItemBorder audio,
+.newItemBorder video {
+  border: solid 4px green;
 }
 </style>

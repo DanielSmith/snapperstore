@@ -23,6 +23,8 @@ let mimeUtils = {
     "ogg": "videoComponent"    
   },
 
+
+
   // the point of this is twofold:
   // 1) we'll have major type for a future DB field (video, audio, etc)
   // 2) normalizing to a single file extension per type (JPEG, jpg -> jpg)

@@ -3,14 +3,18 @@
 */
 
 const express = require('express');
-const app = express();
-let server = require('http').createServer(app);  
 const bodyParser = require('body-parser')
+const app = express();
+// let server = require('http').createServer(app);  
 
-const router = require('./router');
-const apiRouter = require("./api");
+
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 
 app.use(express.static('public'));
+
+const router = require('./router');
+
 
 app.all('/*', function (req, res, next) {
   res.header('Access-Control-Allow-Credentials', "true");
@@ -22,6 +26,7 @@ app.all('/*', function (req, res, next) {
 });
 
 app.use("/", router);
+const apiRouter = require("./api");
 app.use("/api", apiRouter);
 
 app.listen(process.env.PORT || 8081)
