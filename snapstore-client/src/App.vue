@@ -95,6 +95,17 @@
                   <v-btn @click="getTags(curTag)" flat color="orange">{{ curTag }}</v-btn>
                 </span>
 
+    <v-chip
+        close
+        @input="removeTag"
+        @click="chooseTag"
+      >
+        <strong> a tag! </strong> 
+        <span>(interest)</span>
+      </v-chip>
+
+
+
                 <p>{{ curItem.tags }}  - {{ curItem.id }}</p>
               </v-card>
             </v-flex>
@@ -250,6 +261,14 @@ export default {
     doDrop: function(event) {
       event.preventDefault();
       this.doDroppedFiles(event);
+    },
+
+
+    removeTag() {
+      alert('removeTag');
+    },
+    chooseTag() {
+      alert('chooseTag');
     },
 
     getCollections() {
