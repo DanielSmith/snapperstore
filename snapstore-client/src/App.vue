@@ -91,18 +91,16 @@
                 <component :itemPath="curItem.data" key="curKey++" v-bind:is="curItem.componentType">
                 </component>
                 
-                <span v-for="curTag in curItem.tags">
-                  <v-btn @click="getTags(curTag)" flat color="orange">{{ curTag }}</v-btn>
-                </span>
 
-    <v-chip
-        close
-        @input="removeTag"
-        @click="chooseTag"
-      >
-        <strong> a tag! </strong> 
-        <span>(interest)</span>
-      </v-chip>
+    <!-- <v-chip close v-model="chip3" outline color="green">Success</v-chip> -->
+
+                <v-btn  v-for="curTag in curItem.tags" key="curKey++"
+                  @click="chooseTag(curItem.id, curTag)"
+                  >
+                  <strong> {{ curTag }} </strong> 
+                  <span class="showEditTag">  X   {{ allTags[curItem.id] }} </span>
+                </v-btn>
+
 
 
 
@@ -145,6 +143,11 @@ export default {
       curItemDir: '',
       addedItemStr: '',
       name: '',
+
+      clickCount: 1,
+
+      allTags: {},
+      showEditTag: false,
 
       itemList: [],
       itemDBList: [],
@@ -264,11 +267,24 @@ export default {
     },
 
 
-    removeTag() {
-      alert('removeTag');
+    removeTag(id, tag) {
+      alert('removeTag' + id + ' ' + tag);
+
+
+      this.allTags[`${id}${tag}`] = false;
+
+      console.table(this.allTags);
+
+      // 5a10b3bcc7da9023fd0d93e4 other
+
     },
-    chooseTag() {
-      alert('chooseTag');
+    chooseTag(id, tag) {
+
+      console.log(this.allTags);
+      // this.clickCount++;
+      this.allTags[id] = !this.allTags[id] ;
+      // this.showEditTag = !this.showEditTag;
+      // alert('chooseTag');
     },
 
     getCollections() {
@@ -304,10 +320,10 @@ export default {
           const mediaInfo = response.data.mediaInfo;
 
           mediaInfo.map(cur => {
-            let newObj = {};
             newObj.data = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${cur.dayDir}/${cur.fileName}`;
             newObj.componentType = mimeUtils.getItemType(cur.path);
             newObj.tags = cur.tags;
+            this.allTags.id 
             newObj.id = cur._id;
 
             this.itemDBList.push(newObj);
@@ -339,6 +355,7 @@ export default {
     getDayWithDB(theDay) {
       const config = { headers: { 'Content-Type': 'application/json' } };
 
+        let a = 1;
       this.itemDBList = [];
       axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/getDayWithDB`,
         { dayDir: theDay },config)     
@@ -348,12 +365,23 @@ export default {
 
           mediaInfo.map(cur => {
             let newObj = {};
+
             newObj.data = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${cur.dayDir}/${cur.fileName}`;
             newObj.componentType = mimeUtils.getItemType(cur.path);
             newObj.tags = cur.tags;
             newObj.id = cur._id;
+
+            this.$set(this.allTags, newObj.id, true);
+            newObj.tags.map(curTag => {
+
+              this.$set(this.allTags, `${newObj.id}${curTag}`, true);
+              // this.allTags[`${newObj.id}${curTag}`] = true;
+            });
+
             this.itemDBList.push(newObj);
           })
+
+          console.log(this.allTags);
         })
         .catch(err => {
           console.log(err);
@@ -419,6 +447,10 @@ export default {
 @import './stylus/main'
 img {
   max-width: 400px;
+}
+
+.showEditTag {
+  width: 100px;
 }
 
 .newItemBorder img,

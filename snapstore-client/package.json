@@ -12,7 +12,7 @@
     "axios": "^0.16.2",
     "vue": "^2.4.2",
     "vue-config": "^1.0.0",
-    "vuetify": "^0.16.9"
+    "vuetify": "^0.17.1"
   },
   "devDependencies": {
     "babel-core": "^6.0.0",
