@@ -15,6 +15,9 @@ const mediaSchema = new Schema({
   fileName: String,
   size: Number,
   path: String,
+  dayDir: String,
+
+  mimeType: String,
 
   tags: [{
     type: String

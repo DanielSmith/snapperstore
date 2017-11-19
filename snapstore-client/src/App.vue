@@ -32,55 +32,73 @@
                 </v-btn>
               </v-flex>
           </v-layout>
-              <v-layout row v-if="this.showDropHelp">
-                <v-flex xs12>
-                  <v-card flat pb-5>
-                    Drag or Paste Images...
-                  </v-card>
-                </v-flex>
-              </v-layout>
-              <v-flex xs12>
-                <span v-for="curDay in this.dayList" :key="curDay">
-                  <v-btn round color="primary"
-                    @click="getDay(curDay)">
-                    {{ curDay }}
-                  </v-btn>
+          <v-layout row v-if="this.showDropHelp">
+            <v-flex xs12>
+              <v-card flat pb-5>
+                Drag or Paste Images...
+              </v-card>
+            </v-flex>
+          </v-layout>
+          <v-flex xs12>
+            <span v-for="curDay in this.dayList" :key="curDay">
+              <v-btn round color="primary"
+                @click="getDay(curDay)">
+                {{ curDay }}
+              </v-btn>
+            </span>
+          </v-flex>
+
+          <v-layout row v-for="curItem in this.pastedList" key="curKey++">
+            <v-flex xs12>
+              <v-card flat pb-5 class="newItemBorder">
+                <img :src="curItem"> 
+              </v-card>
+              <v-spacer></v-spacer>
+
+            </v-flex>
+          </v-layout>
+
+          <v-layout row v-for="curItem in this.addedList" key="curKey++">
+            <v-flex xs6>
+              <v-card flat pb-5 class="newItemBorder">
+
+                <component :itemPath="curItem.data.src" key="curKey++" v-bind:is="curItem.componentType">
+                </component>
+              <v-spacer></v-spacer>
+
+              </v-card>
+            </v-flex>
+          </v-layout>
+
+
+          <!-- from simple directory listing -->
+          <v-layout row v-for="curItem in this.itemList" key="curKey++">
+            <v-flex xs12>
+              <v-card class="text-xs-left" flat pb-5>
+
+                <component :itemPath="getItemPath(curItem.data)" key="curKey++" v-bind:is="curItem.componentType">
+                </component>
+
+              </v-card>
+            </v-flex>
+          </v-layout>
+
+          <!-- or from DB -->
+          <v-layout row wrap v-for="curItem in this.itemDBList" key="curKey++">
+            <v-flex xs12>
+              <v-card class="text-xs-left" flat pb-5>
+
+                <component :itemPath="curItem.data" key="curKey++" v-bind:is="curItem.componentType">
+                </component>
+                
+                <span v-for="curTag in curItem.tags">
+                  <v-btn @click="getTags(curTag)" flat color="orange">{{ curTag }}</v-btn>
                 </span>
-              </v-flex>
 
-              <v-layout row v-for="curItem in this.pastedList" key="curKey++">
-                <v-flex xs12>
-                  <v-card flat pb-5 class="newItemBorder">
-                    <img :src="curItem"> 
-                  </v-card>
-                  <v-spacer></v-spacer>
-
-                </v-flex>
-              </v-layout>
-
-              <v-layout row v-for="curItem in this.addedList" key="curKey++">
-                <v-flex xs12>
-                  <v-card flat pb-5 class="newItemBorder">
-
-                    <component :itemPath="curItem.data.src" key="curKey++" v-bind:is="curItem.componentType">
-                    </component>
-                  <v-spacer></v-spacer>
-
-                  </v-card>
-                </v-flex>
-              </v-layout>
-
-
-              <v-layout row v-for="curItem in this.itemList" key="curKey++">
-                <v-flex xs12>
-                  <v-card class="text-xs-left" flat pb-5>
-
-                    <component :itemPath="getItemPath(curItem.data)" key="curKey++" v-bind:is="curItem.componentType">
-                    </component>
-
-                  </v-card>
-                </v-flex>
-              </v-layout>
+                <p>{{ curItem.tags }}  - {{ curItem.id }}</p>
+              </v-card>
+            </v-flex>
+          </v-layout>
         </v-container>
       </v-content>
     </main>
@@ -118,6 +136,7 @@ export default {
       name: '',
 
       itemList: [],
+      itemDBList: [],
       pastedList: [],
       addedList: [],
       dayList: []
@@ -251,40 +270,36 @@ export default {
         });
     },
 
+
     getTags(theQueryStr = "") {
+
       const trimmedQueryStr = theQueryStr.trim();
-      // let tagForm = new FormData();
-      // tagForm.append('tagquery', trimmedQueryStr);
-
-
-      // const config = {
-      //   headers: { 'content-type': 'application/x-www-form-urlencoded' }
-      // }
+      this.itemDBList = [];
 
       const config = { headers: { 'Content-Type': 'application/json' } };
 
       axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/gettags`,
         { tagquery: trimmedQueryStr },config)     
-        .then(function (response) {
-          // console.log(response);
+
+        .then(response => {
+          const mediaInfo = response.data.mediaInfo;
+
+          mediaInfo.map(cur => {
+            let newObj = {};
+            newObj.data = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${cur.dayDir}/${cur.fileName}`;
+            newObj.componentType = mimeUtils.getItemType(cur.path);
+            newObj.tags = cur.tags;
+            newObj.id = cur._id;
+
+            this.itemDBList.push(newObj);
+          })
         })
-        .catch(function (error) {
-          console.log(error);
+        .catch(err => {
+          console.log(err);
         });
-
-
     },
 
-    getDay(theDay) {
-      this.curItemDir = theDay;
-      this.addedItemStr = '';
-
-
-      this.itemList = [];
-      this.addedList = [];      
-      this.pastedList = [];
-      this.titleStr = `SnapperStore - for day: ${theDay}`;      
-
+    getDaySimple(theDay) {
       fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/${theDay}`)
         .then(response => response.json())
         .then(response => {
@@ -301,7 +316,56 @@ export default {
         });
     },
 
+
+    getDayWithDB(theDay) {
+      const config = { headers: { 'Content-Type': 'application/json' } };
+
+      this.itemDBList = [];
+      axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/getDayWithDB`,
+        { dayDir: theDay },config)     
+
+        .then(response => {
+          const mediaInfo = response.data.mediaInfo;
+
+          mediaInfo.map(cur => {
+            let newObj = {};
+            newObj.data = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${cur.dayDir}/${cur.fileName}`;
+            newObj.componentType = mimeUtils.getItemType(cur.path);
+            newObj.tags = cur.tags;
+            newObj.id = cur._id;
+            this.itemDBList.push(newObj);
+          })
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
+
+    getDay(theDay) {
+      this.curItemDir = theDay;
+      this.addedItemStr = '';
+
+
+      this.itemList = [];
+      this.itemDBList = [];
+      this.addedList = [];      
+      this.pastedList = [];
+      this.titleStr = `SnapperStore - for day: ${theDay}`;      
+
+      // deliberate ==
+      if (this.$config.USE_DB == 1) {
+        this.getDayWithDB(theDay);
+      } else {
+        this.getDaySimple(theDay);
+      }
+    },
+
     getItemPath(curItem) {
+      console.log('=----- getItemPath');
+
+      console.table(curItem);
+      console.log('<MMMM  getItemPath');
       let itemPath =  `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${this.curItemDir}/${curItem}`;
       return itemPath; 
     },

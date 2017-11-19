@@ -79,8 +79,8 @@ let mimeUtils = {
     },
   },
 
-  getItemType(theFilenane) {
-    let ext =  theFilenane.split('.').pop();
+  getItemType(theFilename) {
+    let ext =  theFilename.split('.').pop();
     let retval =  this.extTable[ext] || "unknown";
 
     return retval;
