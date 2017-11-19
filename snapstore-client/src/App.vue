@@ -94,11 +94,11 @@
 
     <!-- <v-chip close v-model="chip3" outline color="green">Success</v-chip> -->
 
-                <v-btn  v-for="curTag in curItem.tags" key="curKey++"
+                <v-btn  v-for="curTag in allTags[curItem.id]" key="curKey++"
                   @click="chooseTag(curItem.id, curTag)"
                   >
                   <strong> {{ curTag }} </strong> 
-                  <span class="showEditTag">  X   {{ allTags[curItem.id] }} </span>
+                  <span class="showEditTag">  X   </span>
                 </v-btn>
 
 
@@ -280,9 +280,16 @@ export default {
     },
     chooseTag(id, tag) {
 
-      console.log(this.allTags);
+      console.dir(this.allTags);
+
+      this.$set(this.allTags, id, ['more']);
+
+
+      // this.$delete(this.allTags, `${id}${tag}`);
+      // this.$set(this.allTags, `${id}${tag}`, ['a', 'v']);
+
       // this.clickCount++;
-      this.allTags[id] = !this.allTags[id] ;
+      // this.allTags[id] = !this.allTags[id] ;
       // this.showEditTag = !this.showEditTag;
       // alert('chooseTag');
     },
@@ -371,12 +378,12 @@ export default {
             newObj.tags = cur.tags;
             newObj.id = cur._id;
 
-            this.$set(this.allTags, newObj.id, true);
-            newObj.tags.map(curTag => {
+            this.$set(this.allTags, newObj.id, ['this', 'dls']);
+            // newObj.tags.map(curTag => {
 
-              this.$set(this.allTags, `${newObj.id}${curTag}`, true);
-              // this.allTags[`${newObj.id}${curTag}`] = true;
-            });
+            //   this.$set(this.allTags, `${newObj.id}${curTag}`, curTag);
+            //   // this.allTags[`${newObj.id}${curTag}`] = true;
+            // });
 
             this.itemDBList.push(newObj);
           })
