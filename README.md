@@ -9,7 +9,7 @@ This is an end-to-end example of how to upload images via paste or file drag/dro
 
 * Vue.js, Vuetify
 * Node.js, Express, Multer
-* (optional) MongoDB support via mLab for simple search 
+* (optional) MongoDB support via mLab for search with tags 
 * (optional) email support via SendGrid
 
 It is not intended to be a production level example of validation, error handling, etc.  This is simply a quick example that I did for a friend.  It is mostly extracted from my <a href="https://github.com/DanielSmith/ThereThenThat-Server">ThereThenThat project</a>.
@@ -89,7 +89,7 @@ const configs = {
 }
 
 ```
-The USE_DB and USE_EMAIL should match what you have set up for the server side.
+The `USE_DB` and `USE_EMAIL` should match what you have set up for the server side.
 
 
 ```
@@ -129,5 +129,14 @@ Tags can be used in two ways:
 
 Clicking on the pencil button for any item will allow you to add and remove tags.
 
+### Notes on DB and Email
 
+SnapperStore will run without a DB.  It will store media items on the server, and you can browse them by day.
 
+The default setup assumes you are running a local instance of MongoDB.  If you dont wish to set that up, an alternative is to use mLab.com.  That will let you point to a free sandbox MongoDB instance.
+
+SnapperStore also has an example of calling email from Node.js.  To enable this, set up an account at https://sendgrid.com  Once you have that going, set `USE_EMAIL` to 1 on the client side (src/config.js) and `USING_EMAIL` to 1 on the server side (config.json).  Yes, these should be named the same for both sides (will update).  The example is pretty basic: Change the config file to utilize `SS_ADMIN_EMAIL` (who to send the email to) and `SS_ADMIN_FROM` (who it should appear to come from)
+
+### End Note
+
+This started as a sample end to end project for Vue, Node, handling media and tags, and attaching a couple of external services.  It is not meant to be a production quality example.  The tag editing will make its way into my ThereThenThat project.
