@@ -106,19 +106,13 @@ router.post('/fileupload', uploadFile, function(req, res, next) {
   const todayDir = utils.todayDir();
   
   if (ssconfig.USING_DB) {
-    console.log('save to db...');
-
     const newMedia = new MediaProject({
-      projectName: req.body.projectName,
       originalname: req.file.originalname,
       fileName: req.file.filename,
       size: req.file.size,
       path: req.file.path,
       dayDir: todayDir,
       tags: [
-        'night',
-        'dylan',
-        'cat'
       ]
     })
   
@@ -134,8 +128,8 @@ router.post('/fileupload', uploadFile, function(req, res, next) {
     });
   }
 
-  console.log(theTags);
-  console.log(theTags[1]);
+  utils.sendAdminEmail({ originalname: req.file.originalname });
+  
   res.json({
     status: "ok"
   });

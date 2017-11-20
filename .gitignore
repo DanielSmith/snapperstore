@@ -2,3 +2,5 @@
 snapstore-client/package-lock.json
 
 snapstore-server/package-lock.json
+
+snapstore-server/config.json

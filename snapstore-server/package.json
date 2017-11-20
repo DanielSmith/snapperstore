@@ -10,6 +10,7 @@
   "author": "Daniel Smith",
   "license": "MIT",
   "dependencies": {
+    "@sendgrid/mail": "^6.1.4",
     "body-parser": "^1.18.2",
     "date-fns": "^1.28.5",
     "express": "^4.16.1",

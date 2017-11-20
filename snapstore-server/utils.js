@@ -6,6 +6,10 @@ const uuid = require("node-uuid");
 const datefns = require('date-fns');
 const fs = require('fs');
 const { join } = require('path')
+const sgMail = require('@sendgrid/mail');
+const ssconfig = require("./config.json");
+
+
 const ROOT_PUBLIC_DIR = './public';
 const ROOT_UPLOAD_DIR = './public/uploads';
 
@@ -66,6 +70,47 @@ function getImages(dir = '') {
   }
   return entries;
 }
+
+
+function sendAdminEmail(mediaObject) {
+
+  // expand on this.. all manner of checks that should be done
+  // also, mediaObject is meant to be filled up with whatever details
+  // you wish to send...
+  if (ssconfig.USING_EMAIL === undefined || ssconfig.USING_EMAIL == 0) {
+      return;
+  }
+
+  sgMail.setApiKey(ssconfig.SENDGRID_API_KEY);
+  const subject = `New file uploaded: ${mediaObject.originalname}`;
+  const toAddress = ssconfig.SS_ADMIN_EMAIL;
+  const fromAddress = ssconfig.SS_ADMIN_FROM;
+  
+  const htmlEmail = `
+
+    <p>
+    Hello ${toAddress}
+    </p>
+    New File Upload: ${mediaObject.originalname}<br>
+    <br>
+    `;  
+    
+  const textEmail = `
+    
+    New File Upload: ${mediaObject.originalname}<br>
+
+  `;
+
+  const msg = {
+    to: toAddress,
+    from: fromAddress,
+    subject: subject,
+    text: textEmail,
+    html: htmlEmail
+  };
+  sgMail.send(msg);
+}
+
 
 function createUploadFilename(ext) {
   const ts = datefns.getTime(new Date());
@@ -150,5 +195,6 @@ module.exports = {
   getDirs,
   getImages,
   createUploadFilename,
-  getExt
+  getExt,
+  sendAdminEmail
 };
