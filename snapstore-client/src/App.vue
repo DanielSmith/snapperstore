@@ -181,22 +181,6 @@ export default {
       this.getMediaWithDB(this.name, this.BY_KEYWORD);
     },
 
-    toggleEdit(id) {
-      this.showEditTags[id] = !this.showEditTags[id];
-    },
-
-    submitTags(id) {
-      let tAry = (this.allTagEdits[id]).split(/ +/);
-      tAry = tAry.filter(val => val !== '');
-
-      const newTags = [...this.allTags[id], ...tAry].sort();
-      this.$set(this.allTags, id, newTags);
-
-
-      this.showEditTags[id] = false;
-      this.allTagEdits[id] = '';
-    },
-
     // pasted from screen / region capture
     onPaste(event) {
       let index = 0;
@@ -296,16 +280,53 @@ export default {
     },
 
 
+    toggleEdit(id) {
+      this.showEditTags[id] = !this.showEditTags[id];
+    },
+
+    submitTags(id) {
+      let tAry = (this.allTagEdits[id]).split(/ +/);
+      tAry = tAry.filter(val => val !== '');
+
+      const newTagsAr = [...this.allTags[id], ...tAry].sort();
+      const newTags = [...new Set(newTagsAr)];
+      this.$set(this.allTags, id, newTags);
+
+      this.showEditTags[id] = false;
+      this.allTagEdits[id] = '';
+      this.syncTags(id);
+    },
+
     chooseTag(id, tag) {
       // are we editing, or doing a search?
       if (this.showEditTags[id]) {
         const newTags = this.allTags[id].filter(val => val !== tag);
         this.$set(this.allTags, id, newTags);
+        this.syncTags(id);
       } else {
         tag = tag.trim();
         this.getMediaWithDB(tag, this.BY_KEYWORD);
       }
     },
+
+    syncTags(id) {
+      const tags = this.allTags[id];
+
+      console.log(tags);
+      let apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/synctags`,              
+        dbArgs = { id: id, tagquery: tags };
+
+      const config = { headers: { 'Content-Type': 'application/json' } };
+
+      axios.post(apiPath, dbArgs, config)
+        .then(response => {
+          console.log(response);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
 
     getCollections() {
       // call server for JSON data

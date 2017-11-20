@@ -51,6 +51,32 @@ router.post('/gettags', function(req, res, next) {
   })
 })
 
+router.post('/synctags', function(req, res, next) {
+  
+  let returnObj = {};
+
+  console.log(req.body);
+
+  const id = req.body.id;
+  const tags = req.body.tagquery;
+  const updateTags = {
+    tags: tags
+  };
+
+
+  // const tAry = req.body.tagquery.split(/ +/);
+  // console.log(tAry);
+
+
+  MediaProject.findByIdAndUpdate(id, { $set: updateTags }, function(err, result) {
+    if(err){
+        console.log(err);
+    }
+    console.log("RESULT: " + result);
+    res.send('Done')
+  });
+})
+
 router.post('/getDayWithDB', function(req, res) {
 
   let returnObj = {};
@@ -58,7 +84,6 @@ router.post('/getDayWithDB', function(req, res) {
   MediaProject.find({ dayDir: req.body.dayDir })
     .exec(function(err, existingMedia) {
       
-      console.log('errr' + err);
       if (err) { return next(err); }
       
       console.log(existingMedia);
