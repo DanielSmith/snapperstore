@@ -16,7 +16,7 @@
       <v-content class="blue-grey lighten-2">
         <v-container fluid>
           <v-layout row wrap>
-              <v-flex xs4  v-if="this.$config.USE_DB">
+              <v-flex xs4 v-if="this.$config.USE_DB">
                 <v-text-field large
                   label="Search Tag"
                   v-model="name"
@@ -84,27 +84,34 @@
           </v-layout>
 
           <!-- or from DB -->
-          <v-layout row wrap v-for="curItem in this.itemDBList" key="curKey++">
+          <v-layout pb-5 row v-for="curItem in this.itemDBList" key="curKey++">
             <v-flex xs12>
               <v-card class="text-xs-left" flat pb-5>
 
                 <component :itemPath="curItem.data" key="curKey++" v-bind:is="curItem.componentType">
                 </component>
-                
 
-    <!-- <v-chip close v-model="chip3" outline color="green">Success</v-chip> -->
+                <v-btn color="indigo" dark @click="toggleEdit(curItem.id)"><v-icon dark left>mode_edit</v-icon></v-btn>
 
+                <v-form v-if="showEditTags[curItem.id]" ref="form">
+                  <v-layout pl-5 row>
+                    <v-flex xs4>
+                      <v-text-field
+                      label="Enter new tags"
+                      v-model="allTagEdits[curItem.id]"
+                      ></v-text-field>
+                    </v-flex>
+                    <v-flex xs4>
+                      <v-btn @click="submitTags(curItem.id)">Add Tags</v-btn>
+                    </v-flex>
+                  </v-layout>
+                </v-form>
                 <v-btn  v-for="curTag in allTags[curItem.id]" key="curKey++"
                   @click="chooseTag(curItem.id, curTag)"
                   >
                   <strong> {{ curTag }} </strong> 
-                  <span class="showEditTag">  X   </span>
+                  <span class="showEditTag" v-if="showEditTags[curItem.id]"> X  </span>
                 </v-btn>
-
-
-
-
-                <p>{{ curItem.tags }}  - {{ curItem.id }}</p>
               </v-card>
             </v-flex>
           </v-layout>
@@ -139,6 +146,10 @@ export default {
       SERVER_HOST: 'localhost',
       SERVER_PORT: '8081',
 
+      // search modes
+      BY_DAY: 1,
+      BY_KEYWORD: 2,
+
       titleStr: 'SnapperStore',
       curItemDir: '',
       addedItemStr: '',
@@ -147,7 +158,8 @@ export default {
       clickCount: 1,
 
       allTags: {},
-      showEditTag: false,
+      allTagEdits: {},
+      showEditTags: {},
 
       itemList: [],
       itemDBList: [],
@@ -164,8 +176,25 @@ export default {
 
   methods: {
     submit() {
-      // go query for the tag(s)
-      this.getTags(this.name);
+      // go query for the tag(s
+      this.name = this.name.trim();
+      this.getMediaWithDB(this.name, this.BY_KEYWORD);
+    },
+
+    toggleEdit(id) {
+      this.showEditTags[id] = !this.showEditTags[id];
+    },
+
+    submitTags(id) {
+      let tAry = (this.allTagEdits[id]).split(/ +/);
+      tAry = tAry.filter(val => val !== '');
+
+      const newTags = [...this.allTags[id], ...tAry].sort();
+      this.$set(this.allTags, id, newTags);
+
+
+      this.showEditTags[id] = false;
+      this.allTagEdits[id] = '';
     },
 
     // pasted from screen / region capture
@@ -267,31 +296,15 @@ export default {
     },
 
 
-    removeTag(id, tag) {
-      alert('removeTag' + id + ' ' + tag);
-
-
-      this.allTags[`${id}${tag}`] = false;
-
-      console.table(this.allTags);
-
-      // 5a10b3bcc7da9023fd0d93e4 other
-
-    },
     chooseTag(id, tag) {
-
-      console.dir(this.allTags);
-
-      this.$set(this.allTags, id, ['more']);
-
-
-      // this.$delete(this.allTags, `${id}${tag}`);
-      // this.$set(this.allTags, `${id}${tag}`, ['a', 'v']);
-
-      // this.clickCount++;
-      // this.allTags[id] = !this.allTags[id] ;
-      // this.showEditTag = !this.showEditTag;
-      // alert('chooseTag');
+      // are we editing, or doing a search?
+      if (this.showEditTags[id]) {
+        const newTags = this.allTags[id].filter(val => val !== tag);
+        this.$set(this.allTags, id, newTags);
+      } else {
+        tag = tag.trim();
+        this.getMediaWithDB(tag, this.BY_KEYWORD);
+      }
     },
 
     getCollections() {
@@ -306,35 +319,6 @@ export default {
             this.getDay(this.dayList[0]);
             this.showDropHelp = 0;
           }
-        })
-        .catch(err => {
-          console.log(err);
-        });
-    },
-
-
-    getTags(theQueryStr = "") {
-
-      const trimmedQueryStr = theQueryStr.trim();
-      this.itemDBList = [];
-
-      const config = { headers: { 'Content-Type': 'application/json' } };
-
-      axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/gettags`,
-        { tagquery: trimmedQueryStr },config)     
-
-        .then(response => {
-          const mediaInfo = response.data.mediaInfo;
-
-          mediaInfo.map(cur => {
-            newObj.data = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${cur.dayDir}/${cur.fileName}`;
-            newObj.componentType = mimeUtils.getItemType(cur.path);
-            newObj.tags = cur.tags;
-            this.allTags.id 
-            newObj.id = cur._id;
-
-            this.itemDBList.push(newObj);
-          })
         })
         .catch(err => {
           console.log(err);
@@ -359,14 +343,22 @@ export default {
     },
 
 
-    getDayWithDB(theDay) {
+    getMediaWithDB(theArg, theMode = this.BY_DAY) {
       const config = { headers: { 'Content-Type': 'application/json' } };
 
-        let a = 1;
-      this.itemDBList = [];
-      axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/getDayWithDB`,
-        { dayDir: theDay },config)     
+      let apiPath;
+      let dbArgs = {};
+    
+      if (theMode === this.BY_DAY) {
+        apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/getDayWithDB`;
+        dbArgs = { dayDir: theArg };
+      } else {
+        apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/gettags`,              
+        dbArgs = { tagquery: theArg };
+      }
 
+      this.itemDBList = [];
+      axios.post(apiPath, dbArgs, config)
         .then(response => {
           const mediaInfo = response.data.mediaInfo;
 
@@ -378,24 +370,18 @@ export default {
             newObj.tags = cur.tags;
             newObj.id = cur._id;
 
-            this.$set(this.allTags, newObj.id, ['this', 'dls']);
-            // newObj.tags.map(curTag => {
-
-            //   this.$set(this.allTags, `${newObj.id}${curTag}`, curTag);
-            //   // this.allTags[`${newObj.id}${curTag}`] = true;
-            // });
-
+            this.$set(this.showEditTags, newObj.id, false);
+            this.$set(this.allTagEdits, newObj.id, '');
+            this.$set(this.allTags, newObj.id, cur.tags);
             this.itemDBList.push(newObj);
           })
-
-          console.log(this.allTags);
         })
         .catch(err => {
           console.log(err);
         });
     },
 
-
+    // use to switch between methods of access
     getDay(theDay) {
       this.curItemDir = theDay;
       this.addedItemStr = '';
@@ -409,17 +395,13 @@ export default {
 
       // deliberate ==
       if (this.$config.USE_DB == 1) {
-        this.getDayWithDB(theDay);
+        this.getMediaWithDB(theDay, this.BY_DAY);
       } else {
         this.getDaySimple(theDay);
       }
     },
 
     getItemPath(curItem) {
-      console.log('=----- getItemPath');
-
-      console.table(curItem);
-      console.log('<MMMM  getItemPath');
       let itemPath =  `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${this.curItemDir}/${curItem}`;
       return itemPath; 
     },
