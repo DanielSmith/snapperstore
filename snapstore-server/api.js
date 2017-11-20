@@ -53,9 +53,15 @@ router.post('/gettags', function(req, res, next) {
 
 router.post('/synctags', function(req, res, next) {
   
-  let returnObj = {};
 
-  console.log(req.body);
+  // needs much better error handling
+  if (req.body.tagquery === undefined ||
+    req.body.tagquery === '') {
+    res.writeHead(200, {"Content-Type": "application/json"});
+    // res.end(JSON.stringify(existingVideoSessions));
+    res.end(JSON.stringify( { status: 'error'}));
+    return;
+  }
 
   const id = req.body.id;
   const tags = req.body.tagquery;
@@ -63,14 +69,9 @@ router.post('/synctags', function(req, res, next) {
     tags: tags
   };
 
-
-  // const tAry = req.body.tagquery.split(/ +/);
-  // console.log(tAry);
-
-
   MediaProject.findByIdAndUpdate(id, { $set: updateTags }, function(err, result) {
     if(err){
-        console.log(err);
+      console.log(err);
     }
     console.log("RESULT: " + result);
     res.send('Done')

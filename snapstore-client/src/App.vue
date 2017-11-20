@@ -279,17 +279,23 @@ export default {
       this.doDroppedFiles(event);
     },
 
-
     toggleEdit(id) {
       this.showEditTags[id] = !this.showEditTags[id];
     },
 
     submitTags(id) {
+
+      // rewrite this.. the empty and null cases can cause problems
+      // am also being careful not to send an empty tag
       let tAry = (this.allTagEdits[id]).split(/ +/);
       tAry = tAry.filter(val => val !== '');
 
+      if (tAry.length === 0) { tAry = ['']; }
+      if (this.allTags[id] === null) { this.allTags[id] = []; }
+
       const newTagsAr = [...this.allTags[id], ...tAry].sort();
-      const newTags = [...new Set(newTagsAr)];
+      let newTags = [...new Set(newTagsAr)];
+      newTags = newTags.filter(val => val !== '');
       this.$set(this.allTags, id, newTags);
 
       this.showEditTags[id] = false;
