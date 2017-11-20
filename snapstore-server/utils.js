@@ -38,6 +38,7 @@ function todayDir() {
 
 function getDirs() {  
 
+  checkDir();
   // a little long winded, just for clarity
   const entries = fs.readdirSync(ROOT_UPLOAD_DIR)
   let dirEntries = [];

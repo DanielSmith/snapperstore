@@ -53,7 +53,6 @@ router.post('/gettags', function(req, res, next) {
 
 router.post('/synctags', function(req, res, next) {
   
-
   // needs much better error handling
   if (req.body.tagquery === undefined ||
     req.body.tagquery === '') {
@@ -134,7 +133,6 @@ router.post('/fileupload', uploadFile, function(req, res, next) {
     status: "ok"
   });
 })
-
 
 router.get('/')
 
