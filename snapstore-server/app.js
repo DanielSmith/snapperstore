@@ -35,4 +35,4 @@ app.all('/*', function (req, res, next) {
 app.use("/", router);
 const apiRouter = require("./api");
 app.use("/api", apiRouter);
-app.listen(process.env.PORT || 8081)
+app.listen(process.env.PORT || 3100)
