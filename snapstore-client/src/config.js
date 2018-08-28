@@ -14,7 +14,8 @@ const configs = {
   USE_WP: 0,
   WP_HOST: '',
   WP_USER: '',
-  WP_PASWORD: ''
+  WP_PASWORD: '',
+  USE_TMP: ''
 }
 
 Vue.use(vueConfig, configs)
