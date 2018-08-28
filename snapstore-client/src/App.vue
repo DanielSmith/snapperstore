@@ -35,7 +35,7 @@
           <v-layout row v-if="this.showDropHelp">
             <v-flex xs12>
               <v-card flat pb-5>
-                Drag or Paste Images...
+                Drag or Paste Images...  dls
               </v-card>
             </v-flex>
           </v-layout>
@@ -48,7 +48,11 @@
             </span>
           </v-flex>
 
-          <v-layout row v-for="curItem in this.pastedList" key="curKey++">
+
+
+          <!--
+
+          <v-layout row v-for="curItem in this.pastedList" :key="curKey++">
             <v-flex xs12>
               <v-card flat pb-5 class="newItemBorder">
                 <img :src="curItem"> 
@@ -58,37 +62,45 @@
             </v-flex>
           </v-layout>
 
-          <v-layout row v-for="curItem in this.addedList" key="curKey++">
+          <v-layout row v-for="curItem in this.addedList" :key="curItem.rowID">
             <v-flex xs6>
               <v-card flat pb-5 class="newItemBorder">
 
-                <component :itemPath="curItem.data.src" key="curKey++" v-bind:is="curItem.componentType">
+                <component :itemPath="curItem.data.src" :key="curItem.componentID" v-bind:is="curItem.componentType">
                 </component>
               <v-spacer></v-spacer>
 
               </v-card>
             </v-flex>
           </v-layout>
-
+          -->
 
           <!-- from simple directory listing -->
-          <v-layout row v-for="curItem in this.itemList" key="curKey++">
+
+          <!--
+          <v-layout row v-for="curItem in this.itemList" :key="curKey++">
             <v-flex xs12>
               <v-card class="text-xs-left" flat pb-5>
 
-                <component :itemPath="getItemPath(curItem.data)" key="curKey++" v-bind:is="curItem.componentType">
+                <component :itemPath="getItemPath(curItem.data)" :key="curKey++" v-bind:is="curItem.componentType">
                 </component>
 
               </v-card>
             </v-flex>
           </v-layout>
+          -->
+
 
           <!-- or from DB -->
-          <v-layout pb-5 row v-for="curItem in this.itemDBList" key="curKey++">
+                 <!-- :key="componentKey++" -->
+          <v-layout pb-5 row v-for="curItem in this.itemDBList"
+                    :key="curItem.id">           
+
             <v-flex xs12>
               <v-card class="text-xs-left" flat pb-5>
 
-                <component :itemPath="curItem.data" key="curKey++" v-bind:is="curItem.componentType">
+                <component :itemPath="curItem.data"
+                  v-bind:is="curItem.componentType">
                 </component>
 
                 <v-btn color="indigo" dark @click="toggleEdit(curItem.id)"><v-icon dark left>mode_edit</v-icon></v-btn>
@@ -106,8 +118,9 @@
                     </v-flex>
                   </v-layout>
                 </v-form>
-                <v-btn  v-for="curTag in allTags[curItem.id]" key="curKey++"
+                <v-btn  v-for="curTag in allTags[curItem.id]"
                   @click="chooseTag(curItem.id, curTag)"
+                  :key="this.tagKey++"
                   >
                   <strong> {{ curTag }} </strong> 
                   <span class="showEditTag" v-if="showEditTags[curItem.id]"> X  </span>
@@ -128,6 +141,7 @@ import videoComponent from './Video';
 import imageComponent from './Image';
 import mimeUtils from '../../common/mimeUtils';
 
+import uuidv4 from 'uuid/v4';
 
 export default {
     components: {
@@ -140,6 +154,8 @@ export default {
     return {
       currentView: 'videoComponent',
       curKey: 1,
+      tagKey: 1,
+      componentKey: 1,
       showDropHelp: 1,
 
       // put this in some global config
@@ -171,6 +187,7 @@ export default {
 
 
   mounted: function() {
+    console.dir(this.$config);
     this.getCollections();
   },
 
@@ -197,7 +214,7 @@ export default {
           let myImage = new Image();
           myImage.src = event.target.result;
           myImage.onload = () => {
-            // this.doUpload(myImage);
+            this.doUpload(myImage);
           }
         };
         reader.readAsDataURL(imageFile);
@@ -221,6 +238,9 @@ export default {
           let newObj = {};
           newObj.componentType = mimeUtils.getItemType(curFileData.ext);
           newObj.data = droppedItem;
+          newObj.id = uuidv4();
+          newObj.rowID = 'added_row_' + newObj.id;
+          newObj.componentID = 'added_compoent_' + newObj.id;
 
           droppedItem.onload = () => {
             this.showDropHelp = 0;
@@ -230,6 +250,8 @@ export default {
         }
 
         reader.readAsDataURL(curFile);
+
+        console.dir(curFile);
         this.doUpload(curFile, curFileData.ext);
       })
     },
@@ -316,13 +338,13 @@ export default {
     },
 
     syncTags(id) {
+      const config = { headers: { 'Content-Type': 'application/json' } };
       const tags = this.allTags[id];
 
-      console.log(tags);
-      let apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/synctags`,              
+      let apiPath = `${this.$config.SERVER_API}/synctags`,              
         dbArgs = { id: id, tagquery: tags };
+      console.dir(dbArgs);
 
-      const config = { headers: { 'Content-Type': 'application/json' } };
 
       axios.post(apiPath, dbArgs, config)
         .then(response => {
@@ -360,9 +382,12 @@ export default {
             let newObj = {};
             newObj.data = cur;
             newObj.componentType = mimeUtils.getItemType(cur);
+            newObj.itemRowID = `item_${itemID}`
 
             this.itemList.push(newObj);
           })
+
+          console.dir(this.itemList);
         })
         .catch(err => {
           console.log(err);
@@ -372,6 +397,8 @@ export default {
 
     getMediaWithDB(theArg, theMode = this.BY_DAY) {
       const config = { headers: { 'Content-Type': 'application/json' } };
+
+      console.log(' getMediaWithDB...   ');
 
       let apiPath;
       let dbArgs = {};
@@ -387,7 +414,9 @@ export default {
       this.itemDBList = [];
       axios.post(apiPath, dbArgs, config)
         .then(response => {
+          
           const mediaInfo = response.data.mediaInfo;
+          console.dir(mediaInfo);
 
           mediaInfo.map(cur => {
             let newObj = {};
@@ -396,6 +425,7 @@ export default {
             newObj.componentType = mimeUtils.getItemType(cur.path);
             newObj.tags = cur.tags;
             newObj.id = cur._id;
+            newObj.component_id = 'component_' + cur._id;
 
             this.$set(this.showEditTags, newObj.id, false);
             this.$set(this.allTagEdits, newObj.id, '');
@@ -421,6 +451,7 @@ export default {
       this.titleStr = `SnapperStore - for day: ${theDay}`;      
 
       // deliberate ==
+      console.dir(this.$config);
       if (this.$config.USE_DB == 1) {
         this.getMediaWithDB(theDay, this.BY_DAY);
       } else {
@@ -449,7 +480,7 @@ export default {
       this.addedItemStr = `adding items for today...`;
       axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/fileupload`, uploadData, config)
         .then(function (response) {
-          // console.log(response);
+          console.log(response);
         })
         .catch(function (error) {
           console.log(error);

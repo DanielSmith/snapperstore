@@ -51,7 +51,7 @@ router.post('/gettags', function(req, res, next) {
   })
 })
 
-router.post('/synctags', function(req, res, next) {
+router.post('/synctags', function(req, res) {
   
   // needs much better error handling
   if (req.body.tagquery === undefined ||
@@ -105,8 +105,13 @@ router.post('/fileupload', uploadFile, function(req, res, next) {
   const todayDir = utils.todayDir();
   
   if (ssconfig.USING_DB) {
+
+    console.dir(req.file);
+    console.log(`what is ${req.file['originalname']}`);
+
+
     const newMedia = new MediaProject({
-      originalname: req.file.originalname,
+      // originalname: req.file.originalname || 'unknown',
       fileName: req.file.filename,
       size: req.file.size,
       path: req.file.path,

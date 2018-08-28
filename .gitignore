@@ -11,3 +11,6 @@ snapstore-server/config.json
 snapstore-server/config.json
 
 snapstore-server/config.json
+.DS_Store
+snapstore-server/NOTES
+package-lock.json
