@@ -45,7 +45,9 @@ router.post('/gettags', function(req, res, next) {
     returnObj.status = 'ok';
     returnObj.mediaInfo = existingMedia;
     res.writeHead(200, {"Content-Type": "application/json"});
+    // res.end(JSON.stringify(existingVideoSessions));
     res.end(JSON.stringify(returnObj));
+
   })
 })
 
@@ -55,6 +57,7 @@ router.post('/synctags', function(req, res) {
   if (req.body.tagquery === undefined ||
     req.body.tagquery === '') {
     res.writeHead(200, {"Content-Type": "application/json"});
+    // res.end(JSON.stringify(existingVideoSessions));
     res.end(JSON.stringify( { status: 'error'}));
     return;
   }
@@ -76,7 +79,6 @@ router.post('/synctags', function(req, res) {
 
 router.post('/getDayWithDB', function(req, res) {
 
-  console.log('getDayWithDB..');
   let returnObj = {};
   
   MediaProject.find({ dayDir: req.body.dayDir })
@@ -90,6 +92,7 @@ router.post('/getDayWithDB', function(req, res) {
       returnObj.status = 'ok';
       returnObj.mediaInfo = existingMedia;
       res.writeHead(200, {"Content-Type": "application/json"});
+      // res.end(JSON.stringify(existingVideoSessions));
       res.end(JSON.stringify(returnObj));
     });
 })

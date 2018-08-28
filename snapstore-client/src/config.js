@@ -5,7 +5,6 @@ const vueConfig = require('vue-config')
 const configs = {
   ENV: 'Local Dev',
   CLIENT: 'http://localhost:8080',
-<<<<<<< HEAD
   SERVER: 'http://localhost:3100',
 
   SERVER_API: 'http://localhost:8081/api',
@@ -16,12 +15,6 @@ const configs = {
   WP_HOST: '',
   WP_USER: '',
   WP_PASWORD: ''
-=======
-  SERVER: 'http://localhost',
-  SERVER_PORT: ':3100',
-  USING_DB: 1,
-  USING_EMAIL: 0
->>>>>>> 9e8f45e9115f49e857190b2837925b9dd85623f4
 }
 
 Vue.use(vueConfig, configs)

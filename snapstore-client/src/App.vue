@@ -16,17 +16,17 @@
       <v-content class="blue-grey lighten-2">
         <v-container fluid>
           <v-layout row wrap>
-              <v-flex xs4 v-if="this.$config.USING_DB">
+              <v-flex xs4 v-if="this.$config.USE_DB">
                 <v-text-field large
                   label="Search Tag"
                   v-model="name"
                 ></v-text-field>
 
               </v-flex>
-              <v-flex xs2 v-if="this.$config.USING_DB">
+              <v-flex xs2 v-if="this.$config.USE_DB">
                 <v-btn large
                   primary
-                  @click.prevent="submit"
+                  @click="submit"
                 >
                 Submit
                 </v-btn>
@@ -141,11 +141,8 @@ import videoComponent from './Video';
 import imageComponent from './Image';
 import mimeUtils from '../../common/mimeUtils';
 
-<<<<<<< HEAD
 import uuidv4 from 'uuid/v4';
 
-=======
->>>>>>> 9e8f45e9115f49e857190b2837925b9dd85623f4
 export default {
     components: {
       audioComponent,
@@ -160,6 +157,10 @@ export default {
       tagKey: 1,
       componentKey: 1,
       showDropHelp: 1,
+
+      // put this in some global config
+      SERVER_HOST: 'localhost',
+      SERVER_PORT: '8081',
 
       // search modes
       BY_DAY: 1,
@@ -193,10 +194,8 @@ export default {
   methods: {
     submit() {
       // go query for the tag(s
-      if (this.name !== undefined && this.name !== '') {        
-        this.name = this.name.trim();
-        this.getMediaWithDB(this.name, this.BY_KEYWORD);
-      }
+      this.name = this.name.trim();
+      this.getMediaWithDB(this.name, this.BY_KEYWORD);
     },
 
     // pasted from screen / region capture
@@ -342,12 +341,7 @@ export default {
       const config = { headers: { 'Content-Type': 'application/json' } };
       const tags = this.allTags[id];
 
-<<<<<<< HEAD
       let apiPath = `${this.$config.SERVER_API}/synctags`,              
-=======
-      console.log(tags);
-      let apiPath = `${this.$config.SERVER}${this.$config.SERVER_PORT}/api/synctags`,              
->>>>>>> 9e8f45e9115f49e857190b2837925b9dd85623f4
         dbArgs = { id: id, tagquery: tags };
       console.dir(dbArgs);
 
@@ -364,7 +358,7 @@ export default {
 
     getCollections() {
       // call server for JSON data
-      fetch(`${this.$config.SERVER}${this.$config.SERVER_PORT}`)
+      fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}`)
         .then(response => response.json())
         .then(response => {
           this.dayList = response;
@@ -381,7 +375,7 @@ export default {
     },
 
     getDaySimple(theDay) {
-      fetch(`${this.$config.SERVER}${this.$config.SERVER_PORT}/${theDay}`)
+      fetch(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/${theDay}`)
         .then(response => response.json())
         .then(response => {
           response.map(cur => {
@@ -410,10 +404,10 @@ export default {
       let dbArgs = {};
     
       if (theMode === this.BY_DAY) {
-        apiPath = `${this.$config.SERVER}${this.$config.SERVER_PORT}/api/getDayWithDB`;
+        apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/getDayWithDB`;
         dbArgs = { dayDir: theArg };
       } else {
-        apiPath = `${this.$config.SERVER}${this.$config.SERVER_PORT}/api/gettags`,              
+        apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/gettags`,              
         dbArgs = { tagquery: theArg };
       }
 
@@ -427,7 +421,7 @@ export default {
           mediaInfo.map(cur => {
             let newObj = {};
 
-            newObj.data = `${this.$config.SERVER}${this.$config.SERVER_PORT}/uploads/${cur.dayDir}/${cur.fileName}`;
+            newObj.data = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${cur.dayDir}/${cur.fileName}`;
             newObj.componentType = mimeUtils.getItemType(cur.path);
             newObj.tags = cur.tags;
             newObj.id = cur._id;
@@ -457,12 +451,8 @@ export default {
       this.titleStr = `SnapperStore - for day: ${theDay}`;      
 
       // deliberate ==
-<<<<<<< HEAD
       console.dir(this.$config);
       if (this.$config.USE_DB == 1) {
-=======
-      if (this.$config.USING_DB == 1) {
->>>>>>> 9e8f45e9115f49e857190b2837925b9dd85623f4
         this.getMediaWithDB(theDay, this.BY_DAY);
       } else {
         this.getDaySimple(theDay);
@@ -470,7 +460,7 @@ export default {
     },
 
     getItemPath(curItem) {
-      let itemPath =  `${this.$config.SERVER}${this.$config.SERVER_PORT}/uploads/${this.curItemDir}/${curItem}`;
+      let itemPath =  `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${this.curItemDir}/${curItem}`;
       return itemPath; 
     },
 
@@ -488,7 +478,7 @@ export default {
       }
 
       this.addedItemStr = `adding items for today...`;
-      axios.post(`${this.$config.SERVER}${this.$config.SERVER_PORT}/api/fileupload`, uploadData, config)
+      axios.post(`http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/fileupload`, uploadData, config)
         .then(function (response) {
           console.log(response);
         })

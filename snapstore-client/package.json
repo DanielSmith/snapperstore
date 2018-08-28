@@ -5,12 +5,7 @@
   "author": "Daniel Smith <javajoint@gmail.com>",
   "private": true,
   "scripts": {
-<<<<<<< HEAD
     "dev": "cross-env NODE_ENV=development webpack-dev-server -d --open --inline --hot",
-=======
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --inline --hot",
-    "devs": "cross-env NODE_ENV=development webpack-dev-server --host 0.0.0.0  --inline --hot",    
->>>>>>> 9e8f45e9115f49e857190b2837925b9dd85623f4
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {

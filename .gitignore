@@ -11,17 +11,6 @@ snapstore-server/config.json
 snapstore-server/config.json
 
 snapstore-server/config.json
-<<<<<<< HEAD
 .DS_Store
 snapstore-server/NOTES
 package-lock.json
-=======
-
-snapstore-server/config.json
-
-snapstore-client/src/config.js-local
-
-snapstore-server/config.json
-
-snapstore-server/config.json
->>>>>>> 9e8f45e9115f49e857190b2837925b9dd85623f4
