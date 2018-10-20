@@ -125,7 +125,7 @@
                   <span class="showEditTag" v-if="showEditTags[curItem.id]"> X  </span>
                 </v-btn>
                 <v-btn
-                  @click="postWP(curItem.id)"
+                  @click="postWP(curItem)"
                   v-if="$config.USE_WP">Post to WordPress</v-btn>
               </v-card>
             </v-flex>
@@ -200,8 +200,9 @@ export default {
       this.getMediaWithDB(this.name, this.BY_KEYWORD);
     },
 
-    postWP(itemID) {
-      alert('postWP with ' + itemID);
+    postWP(curItem) {
+      console.dir(curItem);
+      alert('postWP with ' + curItem);
     },
 
     // pasted from screen / region capture
