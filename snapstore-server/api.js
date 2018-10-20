@@ -30,9 +30,13 @@ let uploadFile = multerUpload.single('thefile');
 router.post('/gettags', function(req, res, next) {
   
   let returnObj = {};
-  if (req.body.tagquery === undefined ||
-    req.body.tagquery === '') {
-    res.send('none');
+
+  console.dir(req.body);
+
+  if (req.body.tagquery === undefined || req.body.tagquery === '') {
+    returnObj.status = 'ok';
+    res.end(JSON.stringify(returnObj));
+    return;
   }
 
   const tAry = req.body.tagquery.split(/ +/);
@@ -80,11 +84,17 @@ router.post('/synctags', function(req, res) {
 router.post('/getDayWithDB', function(req, res) {
 
   let returnObj = {};
-  
+  console.log('    getDay.....');
+
+  console.dir(req.body);
   MediaProject.find({ dayDir: req.body.dayDir })
     .exec(function(err, existingMedia) {
       
-      if (err) { return next(err); }
+      if (err) {
+        console.log('errr.. ;' + err);
+        return next(err);
+      }
+      console.log('no errr');
       
       console.log(existingMedia);
       console.log(JSON.stringify(existingMedia));
@@ -108,6 +118,8 @@ router.post('/fileupload', uploadFile, function(req, res, next) {
 
     console.dir(req.file);
     console.log(`what is ${req.file['originalname']}`);
+
+    /// should have the media type in here as well...
 
 
     const newMedia = new MediaProject({

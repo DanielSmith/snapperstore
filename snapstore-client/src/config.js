@@ -5,16 +5,22 @@ const vueConfig = require('vue-config')
 const configs = {
   ENV: 'Local Dev',
   CLIENT: 'http://localhost:8080',
-  SERVER: 'http://localhost:3100',
+  SERVER: 'http://localhost:8081',
 
   SERVER_API: 'http://localhost:8081/api',
   
   USE_DB: 1,
   USE_EMAIL: 0,
-  USE_WP: 0,
-  WP_HOST: '',
-  WP_USER: '',
-  WP_PASWORD: '',
+  USE_WP: 1,
+  
+  // point at your own WP server
+  WP_HOST: 'http://wp.dls',
+  
+  // your login..
+  WP_USER: 'daniel',
+  
+  // your password...
+  WP_PASWORD: 'root',
   USE_TMP: ''
 }
 

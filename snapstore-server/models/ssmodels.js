@@ -8,6 +8,7 @@ const Schema = mongoose.Schema;
 mongoose.Promise = global.Promise;
 
 // create model classes
+// should we force mediatype...?
 const mediaSchema = new Schema({
   id: String,
 

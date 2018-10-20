@@ -50,9 +50,7 @@
 
 
 
-          <!--
-
-          <v-layout row v-for="curItem in this.pastedList" :key="curKey++">
+          <v-layout row v-for="curItem in this.pastedList" :key="this.curKey++">
             <v-flex xs12>
               <v-card flat pb-5 class="newItemBorder">
                 <img :src="curItem"> 
@@ -62,6 +60,7 @@
             </v-flex>
           </v-layout>
 
+<!-- 
           <v-layout row v-for="curItem in this.addedList" :key="curItem.rowID">
             <v-flex xs6>
               <v-card flat pb-5 class="newItemBorder">
@@ -125,6 +124,9 @@
                   <strong> {{ curTag }} </strong> 
                   <span class="showEditTag" v-if="showEditTags[curItem.id]"> X  </span>
                 </v-btn>
+                <v-btn
+                  @click="postWP(curItem.id)"
+                  v-if="$config.USE_WP">Post to WordPress</v-btn>
               </v-card>
             </v-flex>
           </v-layout>
@@ -196,6 +198,10 @@ export default {
       // go query for the tag(s
       this.name = this.name.trim();
       this.getMediaWithDB(this.name, this.BY_KEYWORD);
+    },
+
+    postWP(itemID) {
+      alert('postWP with ' + itemID);
     },
 
     // pasted from screen / region capture
@@ -341,6 +347,9 @@ export default {
       const config = { headers: { 'Content-Type': 'application/json' } };
       const tags = this.allTags[id];
 
+              apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/getDayWithDB`;
+
+
       let apiPath = `${this.$config.SERVER_API}/synctags`,              
         dbArgs = { id: id, tagquery: tags };
       console.dir(dbArgs);
@@ -381,6 +390,9 @@ export default {
           response.map(cur => {
             let newObj = {};
             newObj.data = cur;
+
+
+            console.dir(cur);
             newObj.componentType = mimeUtils.getItemType(cur);
             newObj.itemRowID = `item_${itemID}`
 
@@ -406,6 +418,7 @@ export default {
       if (theMode === this.BY_DAY) {
         apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/getDayWithDB`;
         dbArgs = { dayDir: theArg };
+        console.dir(dbArgs);
       } else {
         apiPath = `http://${this.SERVER_HOST}:${this.SERVER_PORT}/api/gettags`,              
         dbArgs = { tagquery: theArg };
@@ -443,21 +456,21 @@ export default {
       this.curItemDir = theDay;
       this.addedItemStr = '';
 
-
       this.itemList = [];
       this.itemDBList = [];
       this.addedList = [];      
       this.pastedList = [];
       this.titleStr = `SnapperStore - for day: ${theDay}`;      
 
-      // deliberate ==
       console.dir(this.$config);
       if (this.$config.USE_DB == 1) {
+        console.log('using db.,... it 1...');
         this.getMediaWithDB(theDay, this.BY_DAY);
       } else {
         this.getDaySimple(theDay);
       }
     },
+
 
     getItemPath(curItem) {
       let itemPath =  `http://${this.SERVER_HOST}:${this.SERVER_PORT}/uploads/${this.curItemDir}/${curItem}`;

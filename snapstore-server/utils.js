@@ -55,6 +55,7 @@ function getDirs() {
 function getImages(dir = '') {
   let imageDir;
   let entries = [];
+  let entryInfoObj = {};
 
   // if we dont have a directory specified, try today... 
   if (dir === '') {
@@ -69,7 +70,11 @@ function getImages(dir = '') {
   if (fs.existsSync(imageDir)) {
     entries = fs.readdirSync(imageDir);
   }
-  return entries;
+
+  entryInfoObj.dir = dir;
+  entryInfoObj.entries = entries;
+
+  return entryInfoObj;
 }
 
 
